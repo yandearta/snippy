@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useCopyFeedback } from '@/hooks/useCopyFeedback'
 import { useSnippets } from '@/hooks/useSnippets'
 import { createSnippet, updateSnippet } from '@/lib/snippet-storage'
+import { Footer } from './components/Footer'
 
 function App() {
   const [snippets, setSnippets] = useSnippets()
@@ -193,6 +194,8 @@ function App() {
                 )}
               />
             )}
+
+        <Footer />
       </div>
 
       {/* Delete Confirmation Dialog */}
