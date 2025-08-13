@@ -21,8 +21,11 @@ import { useCopyFeedback } from '@/hooks/useCopyFeedback'
 import { useSnippets } from '@/hooks/useSnippets'
 import { createSnippet, updateSnippet } from '@/lib/snippet-storage'
 import { Footer } from './components/Footer'
+import { useTheme } from './components/ThemeProvider'
+import { Toaster } from './components/ui/sonner'
 
 function App() {
+  const { theme } = useTheme()
   const [snippets, setSnippets] = useSnippets()
   const { copySuccess, handleCopy } = useCopyFeedback()
 
@@ -260,6 +263,8 @@ function App() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Toaster theme={theme} richColors />
     </div>
   )
 }

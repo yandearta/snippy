@@ -1,12 +1,13 @@
 import { ExternalLink } from 'lucide-react'
 
+import { ModeToggle } from './ModeToggle'
 import { Card, CardContent } from './ui/card'
 
 export function Footer() {
   return (
     <footer>
       <Card>
-        <CardContent>
+        <CardContent className="flex items-center justify-between">
           <p>
             Made with ❤️ by
             {' '}
@@ -22,6 +23,7 @@ export function Footer() {
             </a>
           </p>
 
+          <ModeToggle />
         </CardContent>
       </Card>
     </footer>
