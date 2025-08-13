@@ -31,13 +31,16 @@ export function updateSnippet(snippet: Snippet, updates: { title?: string, conte
   }
 }
 
-export async function copyToClipboard(text: string): Promise<boolean> {
+export async function copyToClipboard(text: string): Promise<{ success: boolean, error?: string }> {
   try {
     await navigator.clipboard.writeText(text)
-    return true
+    return { success: true }
   }
-  catch {
-    return false
+  catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to copy to clipboard',
+    }
   }
 }
 

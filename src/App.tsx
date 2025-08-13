@@ -1,7 +1,8 @@
 import type { Snippet } from '@/lib/snippet-storage'
 
 import { Plus, Save, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { SortableSnippetList } from '@/components/SortableSnippetList'
 import { Button } from '@/components/ui/button'
@@ -49,18 +50,43 @@ function App() {
     setEditContent('')
   }
 
+  function handleCopyWrapper(content: string, id: string) {
+    const snippet = snippets.find(s => s.id === id)
+    handleCopy(content, id, snippet?.title || 'Untitled')
+  }
+
   function resetDeleteDialog() {
     setDeleteDialogOpen(false)
     setSnippetToDelete(null)
   }
 
-  function handleCreateSnippet() {
-    if (!newContent.trim())
-      return
+  // Handle ESC key to cancel edit
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape' && editingId) {
+        resetEditForm()
+      }
+    }
 
-    const snippet = createSnippet(newTitle, newContent)
-    setSnippets([snippet, ...snippets])
-    resetCreateForm()
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [editingId])
+
+  function handleCreateSnippet() {
+    if (!newContent.trim()) {
+      toast.error('Content cannot be empty')
+      return
+    }
+
+    try {
+      const snippet = createSnippet(newTitle, newContent)
+      setSnippets([snippet, ...snippets])
+      toast.success(`Snippet "${snippet.title || 'Untitled'}" created!`)
+      resetCreateForm()
+    }
+    catch {
+      toast.error('Failed to create snippet')
+    }
   }
 
   function handleStartEdit(snippet: Snippet) {
@@ -70,17 +96,25 @@ function App() {
   }
 
   function handleSaveEdit() {
-    if (!editingId)
+    if (!editingId) {
+      toast.error('No snippet selected for editing')
       return
+    }
 
-    const original = snippets.find(s => s.id === editingId)!
-    const updated = updateSnippet(original, {
-      title: editTitle,
-      content: editContent,
-    })
+    try {
+      const original = snippets.find(s => s.id === editingId)!
+      const updated = updateSnippet(original, {
+        title: editTitle,
+        content: editContent,
+      })
 
-    setSnippets(snippets.map(s => s.id === editingId ? updated : s))
-    resetEditForm()
+      setSnippets(snippets.map(s => s.id === editingId ? updated : s))
+      toast.success(`Snippet "${updated.title || 'Untitled'}" updated!`)
+      resetEditForm()
+    }
+    catch {
+      toast.error('Failed to update snippet')
+    }
   }
 
   function handleDeleteClick(id: string) {
@@ -89,11 +123,20 @@ function App() {
   }
 
   function handleConfirmDelete() {
-    if (!snippetToDelete)
+    if (!snippetToDelete) {
+      toast.error('No snippet selected for deletion')
       return
+    }
 
-    setSnippets(snippets.filter(s => s.id !== snippetToDelete))
-    resetDeleteDialog()
+    try {
+      const snippet = snippets.find(s => s.id === snippetToDelete)
+      setSnippets(snippets.filter(s => s.id !== snippetToDelete))
+      toast.success(`Snippet "${snippet?.title || 'Untitled'}" deleted!`)
+      resetDeleteDialog()
+    }
+    catch {
+      toast.error('Failed to delete snippet')
+    }
   }
 
   return (
@@ -153,7 +196,7 @@ function App() {
                 onSnippetsChange={setSnippets}
                 editingId={editingId}
                 copySuccess={copySuccess}
-                onCopy={handleCopy}
+                onCopy={handleCopyWrapper}
                 onEdit={handleStartEdit}
                 onDelete={handleDeleteClick}
                 editForm={(
